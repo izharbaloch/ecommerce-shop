@@ -1,9 +1,25 @@
 @extends('layouts.site')
 
 @section('style')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"
-        integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> --}}
+
+
+    <style>
+        #success_alert {
+            background: rgb(148, 225, 148);
+            padding: 15px;
+            color: black;
+            margin-bottom: 5px;
+        }
+
+        #errro_alert {
+            background: red;
+            padding: 15px;
+            color: black;
+            margin-bottom: 5px;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -27,6 +43,18 @@
             <div class="row pt120">
                 <div class="books-grid">
 
+                    {{-- @if (session('alert_success'))
+                    <div class="alert alert-primary" id="success_alert" role="alert">
+                        {{ session('alert_success') }}
+                    </div>
+                    @endif
+
+                    @if (session('alert_error'))
+                        <div class="alert alert-primary" id="errro_alert" role="alert">
+                            {{ session('alert_error') }}
+                        </div>
+                    @endif --}}
+
                     <div class="row mb30">
 
                         @if (count($products) > 0)
@@ -43,7 +71,9 @@
                                         </div>
 
                                         <div class="books-item-info">
-                                            <h5 class="books-title">{{ $product ? $product->name : '' }}</h5>
+                                            <h5 class="books-title"><a
+                                                    href="{{ route('site.product.details', $product->slug) }}">{{ $product ? $product->name : '' }}</a>
+                                            </h5>
 
                                             <div class="books-price">{{ config('product.currency') . $product->price }}
                                             </div>
@@ -69,30 +99,33 @@
 
                     </div>
 
-                    <div class="row pb120">
+                    @if (count($products) > 0)
+                        <div class="row pb120">
 
-                        <div class="col-lg-12">
+                            {{ $products->links() }}
+                            {{-- <div class="col-lg-12">
 
-                            <nav class="navigation align-center">
+                                <nav class="navigation align-center">
 
-                                <a href="#" class="page-numbers bg-border-color current"><span>1</span></a>
-                                <a href="#" class="page-numbers bg-border-color"><span>2</span></a>
-                                <a href="#" class="page-numbers bg-border-color"><span>3</span></a>
-                                <a href="#" class="page-numbers bg-border-color"><span>4</span></a>
-                                <a href="#" class="page-numbers bg-border-color"><span>5</span></a>
+                                    <a href="#" class="page-numbers bg-border-color current"><span>1</span></a>
+                                    <a href="#" class="page-numbers bg-border-color"><span>2</span></a>
+                                    <a href="#" class="page-numbers bg-border-color"><span>3</span></a>
+                                    <a href="#" class="page-numbers bg-border-color"><span>4</span></a>
+                                    <a href="#" class="page-numbers bg-border-color"><span>5</span></a>
 
-                                <svg class="btn-prev">
-                                    <use xlink:href="#arrow-left"></use>
-                                </svg>
-                                <svg class="btn-next">
-                                    <use xlink:href="#arrow-right"></use>
-                                </svg>
+                                    <svg class="btn-prev">
+                                        <use xlink:href="#arrow-left"></use>
+                                    </svg>
+                                    <svg class="btn-next">
+                                        <use xlink:href="#arrow-right"></use>
+                                    </svg>
 
-                            </nav>
+                                </nav>
+
+                            </div> --}}
 
                         </div>
-
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -102,9 +135,7 @@
 @section('script')
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"
-        integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 
     <script>
         $(document).ready(function() {
@@ -121,11 +152,10 @@
                     },
 
                     success: function(data) {
-                        if (data.cart) {
+                        if (data.message) {
 
-                            toastr.success('Product added to cart successfully!');
-                            console.log(data.cart);
-                            calculateCartItems();
+                            toastr.success(data.message);
+                            console.log(data.message);
                         }
                     },
 
@@ -160,7 +190,7 @@
 
                     success: function(data) {
 
-                        if(data.cart_total_items){
+                        if (data.cart_total_items) {
                             $('.cart_total_items').html(data.cart_total_items)
                         }
                         console.log(data);

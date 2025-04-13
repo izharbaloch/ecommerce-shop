@@ -31,11 +31,12 @@
 
                             <div class="cart">
 
-                                <h1 class="cart-title">In Your Shopping Cart: <span class="c-primary"> {{ session('cart') ? count(session('cart')): 0 }} items</span></h1>
+                                <h1 class="cart-title">In Your Shopping Cart: <span class="c-primary">
+                                        {{ countTotalCartItems() }} items</span></h1>
 
                             </div>
 
-                            @if (session('cart'))
+                            @if (count($cartItems) > 0)
                                 <form action="#" method="post" class="cart-main">
 
                                     <table class="shop_table cart">
@@ -51,16 +52,17 @@
                                         <tbody>
 
                                             @php $cartTotal = 0; @endphp
-                                            @foreach (session('cart') as $cartItem)
+                                            @foreach ($cartItems as $cartItem)
+                                                @php
+                                                    $cartTotal += $cartItem->price * $cartItem->quantity;
+                                                @endphp
 
-                                            @php
-                                                $cartTotal += $cartItem['price'] * $cartItem['quantity'];
-                                            @endphp
                                                 <tr class="cart_item">
-
+                                                    <input type="hidden" name="product_id" class="product_id"
+                                                        value="{{ $cartItem->id }}">
                                                     <td class="product-remove">
-                                                        <a href="#" class="product-del remove"
-                                                            title="Remove this item">
+                                                        <a href="{{ route('delte.cart', $cartItem->id) }}"
+                                                            class="product-del remove" title="Remove this item">
                                                             <i class="seoicon-delete-bold"></i>
                                                         </a>
                                                     </td>
@@ -69,34 +71,40 @@
 
                                                         <div class="cart-product__item">
                                                             <a href="#">
-                                                                <img src="{{ $cartItem['image'] }}"
-                                                                    alt="product"
+                                                                <img src="{{ $cartItem->image }}" alt="product"
                                                                     class="attachment-shop_thumbnail size-shop_thumbnail wp-post-image">
                                                             </a>
                                                             <div class="cart-product-content">
                                                                 <p class="cart-author">Search Marketing</p>
-                                                                <h5 class="cart-product-title">{{ $cartItem['name'] }}</h5>
+                                                                <h5 class="cart-product-title">{{ $cartItem->name }}</h5>
                                                             </div>
                                                         </div>
                                                     </td>
 
                                                     <td class="product-price">
-                                                        <h5 class="price amount">{{ config('product.currency') }}{{ $cartItem['price'] }}</h5>
+                                                        <h5 class="price amount">
+                                                            {{ config('product.currency') }}{{ $cartItem->price }}</h5>
                                                     </td>
 
                                                     <td class="product-quantity">
 
                                                         <div class="quantity">
-                                                            <a href="#" class="quantity-minus">-</a>
-                                                            <input title="Qty" class="email input-text qty text"
-                                                                type="text" placeholder="1" readonly value="{{ $cartItem['quantity'] }}">
-                                                            <a href="#" class="quantity-plus">+</a>
+                                                            <a href="#" class="quantity-minus decrease_quantity_btn"
+                                                                id="decrease_quantity_btn">-</a>
+                                                            <input title="Qty" id="qty"
+                                                                class="email input-text qty text" type="text"
+                                                                placeholder="1" readonly
+                                                                value="{{ $cartItem['quantity'] }}">
+                                                            <a href="#" class="quantity-plus increase_quantity_btn"
+                                                                id="increase_quantity_btn">+</a>
                                                         </div>
 
                                                     </td>
 
                                                     <td class="product-subtotal">
-                                                        <h5 class="total amount">{{ config('product.currency') }}{{ $cartItem['price'] * $cartItem['quantity'] }}</h5>
+                                                        <h5 class="total amount {{ $cartItem->id }}_product_price">
+                                                            {{ config('product.currency') }}{{ $cartItem->price * $cartItem->quantity }}
+                                                        </h5>
                                                     </td>
 
                                                 </tr>
@@ -104,7 +112,7 @@
 
 
 
-                                            <tr>
+                                            {{-- <tr>
                                                 <td colspan="5" class="actions">
 
                                                     <div class="coupon">
@@ -122,7 +130,7 @@
                                                     </div>
 
                                                 </td>
-                                            </tr>
+                                            </tr> --}}
 
                                         </tbody>
                                     </table>
@@ -132,8 +140,10 @@
 
                                 <div class="cart-total">
                                     <h3 class="cart-total-title">Cart Totals</h3>
-                                    <h5 class="cart-total-total">Total: <span class="price">{{ config('product.currency') }}{{ $cartTotal }}</span></h5>
-                                    <a href="checkout.html" class="btn btn-medium btn--light-green btn-hover-shadow">
+                                    <h5 class="cart-total-total">Total: <span class="price"
+                                            id="cart_total">{{ config('product.currency') }}{{ $cartTotal }}</span>
+                                    </h5>
+                                    <a href="{{ route('site.checkout') }}" class="btn btn-medium btn--light-green btn-hover-shadow">
                                         <span class="text">Checkout</span>
                                         <span class="semicircle"></span>
                                     </a>
@@ -151,4 +161,91 @@
 
 
     </div>
+@endsection
+
+@section('script')
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.decrease_quantity_btn').click(function() {
+                // var qty = $('#qty').val();
+                var qty = $(this).closest("tr").find("input.qty").val();
+
+                var product_id = $(this).closest("tr").find("input.product_id").val();
+
+                $.ajax({
+                    url: "{{ route('cart.quantity.update') }}",
+                    method: "GET",
+                    data: {
+                        qty,
+                        product_id
+                    },
+
+                    success: function(data) {
+                        // console.log(data);
+                        if (data.product_price) {
+                            $('.' + data.product_id + '_product_price').html(data
+                                .product_price);
+                            caculateSumOfCartItems();
+                        }
+                    },
+
+                    error: function(response) {
+                        console.log(response);
+
+                    }
+                });
+            })
+
+            $('.increase_quantity_btn').click(function() {
+                var qty = $(this).closest("tr").find("input.qty").val();
+
+                var product_id = $(this).closest("tr").find("input.product_id").val();
+
+                $.ajax({
+                    url: "{{ route('cart.quantity.update') }}",
+                    method: "GET",
+                    data: {
+                        qty,
+                        product_id
+                    },
+
+                    success: function(data) {
+                        console.log(data);
+                        if (data.product_price) {
+                            $('.' + data.product_id + '_product_price').html(data
+                                .product_price);
+                            caculateSumOfCartItems();
+                        }
+                    },
+
+                    error: function(response) {
+                        console.log(response);
+
+                    }
+                })
+            })
+
+            function caculateSumOfCartItems(totalAmount) {
+                $.ajax({
+                    url: "{{ route('cart.items.total.amount') }}",
+                    method: "GET",
+
+                    success: function(data) {
+                        console.log(data);
+                        if (data.total_amount) {
+
+                            $('#cart_total').text(data.total_amount); // Consistent key
+                        }
+                    },
+
+                    error: function(response) {
+                        console.log(response);
+
+                    }
+                })
+            }
+        })
+    </script>
 @endsection

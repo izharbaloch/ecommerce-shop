@@ -32,7 +32,7 @@
                                 <div class="swiper-wrapper">
                                     <!-- Slides -->
                                     <div class="product-details-img-wrap swiper-slide">
-                                        <img src="{{ asset('assets/site/img/product-details.png') }}" alt="product" data-swiper-parallax="-10">
+                                        <img src="{{ $product->gallery->image }}" alt="product" data-swiper-parallax="-10">
                                     </div>
                                 </div>
                             </div>
@@ -40,30 +40,38 @@
                     </div>
 
 
-                    <div
-                        class="col-lg-6 col-lg-offset-1 col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-12 col-xs-offset-0">
-                        <div class="product-details-info">
-                            <div class="product-details-info-price">$16.99</div>
-                            <h3 class="product-details-info-title">Marketing Strategy</h3>
-                            <p class="product-details-info-text">Qolor sit amet, consectetuer adipiscing elit, sed diam
-                                nonummy
-                                nibham liber tempor cum soluta nobis eleifend option congue nihil uarta decima et quinta.
-                                Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis.
-                            </p>
+                    <form action="{{ route('add.to.cart') }}" method="GET">
 
-                            <div class="quantity">
-                                <a href="#" class="quantity-minus">-</a>
-                                <input title="Qty" class="email input-text qty text" type="text" value="2">
-                                <a href="#" class="quantity-plus">+</a>
+                        <div
+                            class="col-lg-6 col-lg-offset-1 col-md-6 col-md-offset-1 col-sm-6 col-sm-offset-1 col-xs-12 col-xs-offset-0">
+                            <div class="product-details-info">
+                                <div class="product-details-info-price">
+                                    {{ config('product.currency') }}{{ $product->price }}
+                                </div>
+                                <h3 class="product-details-info-title">{{ $product->name }}</h3>
+                                <p class="product-details-info-text">Qolor sit amet, consectetuer adipiscing elit, sed diam
+                                    nonummy
+                                    nibham liber tempor cum soluta nobis eleifend option congue nihil uarta decima et
+                                    quinta.
+                                    Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis.
+                                </p>
+
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <div class="quantity">
+                                    <a href="#" class="quantity-minus">-</a>
+                                    <input title="Qty" name="quantity" class="email input-text qty text" type="text"
+                                        value="1">
+                                    <a href="#" class="quantity-plus">+</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-medium btn--primary">
+                                    <span class="text">Add to Cart</span>
+                                    <i class="seoicon-commerce"></i>
+                                    <span class="semicircle"></span>
+                                </button>
                             </div>
-
-                            <a href="cart.html" class="btn btn-medium btn--primary">
-                                <span class="text">Add to Cart</span>
-                                <i class="seoicon-commerce"></i>
-                                <span class="semicircle"></span>
-                            </a>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
