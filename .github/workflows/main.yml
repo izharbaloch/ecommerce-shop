@@ -3,7 +3,7 @@ name: 🚀 Deploy Laravel to cPanel
 on:
   push:
     branches:
-      - main  # or your working branch
+      - main
 
 jobs:
   deploy:
@@ -16,28 +16,28 @@ jobs:
       - name: 🧱 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'  # Change based on your Laravel version
+          php-version: '8.1'
           extensions: mbstring, bcmath, intl, pdo, curl
 
       - name: 📦 Install Composer Dependencies
         run: composer install --no-dev --optimize-autoloader
 
-      - name: ⚙️ Laravel Commands
+      - name: ⚙️ Laravel Optimize Commands
         run: |
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
 
-      - name: 🚀 Deploy to cPanel via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4
+      - name: 🚀 FTP Deploy to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_PATH }}
           exclude: |
-            .env
             .git*
             node_modules/
+            tests/
             storage/logs/
-            vendor/bin/
+            .env
