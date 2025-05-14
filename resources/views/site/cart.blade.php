@@ -143,7 +143,8 @@
                                     <h5 class="cart-total-total">Total: <span class="price"
                                             id="cart_total">{{ config('product.currency') }}{{ $cartTotal }}</span>
                                     </h5>
-                                    <a href="{{ route('site.checkout') }}" class="btn btn-medium btn--light-green btn-hover-shadow">
+                                    <a href="{{ route('site.checkout') }}"
+                                        class="btn btn-medium btn--light-green btn-hover-shadow">
                                         <span class="text">Checkout</span>
                                         <span class="semicircle"></span>
                                     </a>
