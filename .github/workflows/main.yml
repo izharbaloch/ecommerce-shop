@@ -1,0 +1,43 @@
+name: 🚀 Deploy Laravel to cPanel
+
+on:
+  push:
+    branches:
+      - main  # or your working branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v3
+
+      - name: 🧱 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'  # Change based on your Laravel version
+          extensions: mbstring, bcmath, intl, pdo, curl
+
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: ⚙️ Laravel Commands
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      - name: 🚀 Deploy to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_PATH }}
+          exclude: |
+            .env
+            .git*
+            node_modules/
+            storage/logs/
+            vendor/bin/
